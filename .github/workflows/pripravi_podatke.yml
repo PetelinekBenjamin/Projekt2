@@ -43,6 +43,8 @@ jobs:
         dvc remote modify origin --local user PetelinekBenjamin
         dvc remote modify origin --local password 30663408e580bdb3f66e074627577a040f36b5ff
 
+        dvc pull
+
     
 
     - name: Run izprazni.py
@@ -93,30 +95,9 @@ jobs:
         git commit -m "Update changes"
         git push
         
-    - name: Configure DVC remote
-      run: |
-        dvc remote add -f -d origin https://dagshub.com/PetelinekBenjamin/Projekt.dvc
-        dvc remote modify origin --local auth basic
-        dvc remote modify origin --local user PetelinekBenjamin
-        dvc remote modify origin --local password 30663408e580bdb3f66e074627577a040f36b5ff
+    
         
-    - name: Remove from Git and add to DVC
-      run: |
-        set -e
-
-        # Stop tracking the file with git
-        git rm --cached 'data/processed/reference_data.csv'
-        
-        # Add the file with DVC
-        dvc add 'data/processed/reference_data.csv'
-        
-        # Push the file to remote storage with verbose output for debugging
-        dvc push -v || { echo "DVC push failed"; exit 1; }
-        
-        # Add DVC changes to Git
-        git add data/processed/reference_data.csv.dvc data/processed/.gitignore
-        git commit -m "track data/processed/reference_data.csv with DVC"
-        git push
+    
        
         
         
