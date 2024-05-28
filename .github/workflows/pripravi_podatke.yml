@@ -1,0 +1,129 @@
+name: Pipravi podatke
+
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'  # Poskrbi, da bo uporabljena verzija, združljiva s TensorFlow 2.10.1
+
+    
+    
+    - name: Set up DVC
+      run: |
+        git config user.name "Benjamin"
+        git config user.email "benjamin.petelinek@gmail.com"
+        python -m pip install --upgrade pip
+        pip install dvc
+        pip3 install --upgrade dvc
+        
+        
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        git config user.name "Benjamin"
+        git config user.email "benjamin.petelinek@gmail.com"
+
+        dvc remote add origin https://dagshub.com/PetelinekBenjamin/Projekt.dvc -f
+        dvc remote modify origin --local auth basic
+        dvc remote modify origin --local user PetelinekBenjamin
+        dvc remote modify origin --local password 30663408e580bdb3f66e074627577a040f36b5ff
+
+    
+
+    - name: Run izprazni.py
+      run: |
+        python notebooks/Projekt/izprazni.py
+        git add .
+        git commit -m "Update changes"
+        git push
+    
+    - name: Run fetch_data_nesrece.py
+      run: |
+        python notebooks/Projekt/pridobi_nesrece.py
+        
+
+    - name: Run fetch_data_promet.py
+      run: |
+        python notebooks/Projekt/prodobi_prometne_podatke.py
+        
+
+    - name: Run fetch_data_vreme.py
+      run: |
+        python notebooks/Projekt/pridobi_vremenske_podatke.py
+        git add .
+        git commit -m "Update changes"
+        git push
+
+        
+
+    - name: Run pre_process.py
+      run: |
+        python notebooks/Projekt/pre_process.py
+        git add .
+        git commit -m "Update changes"
+        git push
+        
+
+    - name: Run GreatExpectations
+      run: |
+        python notebooks/Projekt/GreatExp.py
+        git add .
+        git commit -m "Update changes"
+        git push
+
+    - name: Run Evidently
+      run: |
+        python notebooks/Projekt/evi_script.py
+        git add .
+        git commit -m "Update changes"
+        git push
+        
+    - name: Configure DVC remote
+      run: |
+        dvc remote add -f -d origin https://dagshub.com/PetelinekBenjamin/Projekt.dvc
+        dvc remote modify origin --local auth basic
+        dvc remote modify origin --local user PetelinekBenjamin
+        dvc remote modify origin --local password 30663408e580bdb3f66e074627577a040f36b5ff
+        
+    - name: Remove from Git and add to DVC
+      run: |
+        set -e
+
+        # Stop tracking the file with git
+        git rm --cached 'data/processed/reference_data.csv'
+        
+        # Add the file with DVC
+        dvc add 'data/processed/reference_data.csv'
+        
+        # Push the file to remote storage with verbose output for debugging
+        dvc push -v || { echo "DVC push failed"; exit 1; }
+        
+        # Add DVC changes to Git
+        git add data/processed/reference_data.csv.dvc data/processed/.gitignore
+        git commit -m "track data/processed/reference_data.csv with DVC"
+        git push
+       
+        
+        
+
+    
+    
+    
+
+
+    
