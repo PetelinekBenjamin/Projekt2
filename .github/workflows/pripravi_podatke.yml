@@ -20,15 +20,6 @@ jobs:
         python-version: '3.9'  # Poskrbi, da bo uporabljena verzija, združljiva s TensorFlow 2.10.1
 
     
-    
-    - name: Set up DVC
-      run: |
-        git config user.name "Benjamin"
-        git config user.email "benjamin.petelinek@gmail.com"
-        python -m pip install --upgrade pip
-        pip install dvc
-        pip3 install --upgrade dvc
-        
         
     
     - name: Install dependencies
@@ -43,7 +34,7 @@ jobs:
         dvc remote modify origin --local user PetelinekBenjamin
         dvc remote modify origin --local password 30663408e580bdb3f66e074627577a040f36b5ff
 
-        dvc pull -r origin --force
+       
 
     
 
